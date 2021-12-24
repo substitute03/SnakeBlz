@@ -19,7 +19,13 @@ namespace SnakeBlz.Components
 
         protected override void OnInitialized()
         {
+        }
 
+        public void SpawnSnake()
+        {
+            CellComponents.Where(c => c.X == 7 && c.Y == 7).Single().CellType = CellType.Snake;
+            CellComponents.Where(c => c.X == 7 && c.Y == 8).Single().CellType = CellType.Snake;
+            CellComponents.Where(c => c.X == 7 && c.Y == 9).Single().CellType = CellType.Snake;
         }
     }
 }

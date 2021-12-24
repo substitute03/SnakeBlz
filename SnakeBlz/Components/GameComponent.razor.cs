@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 using static SnakeBlz.Domain.Enums;
 
 namespace SnakeBlz.Components;
@@ -14,13 +15,23 @@ public partial class GameComponent
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        SpawnSnake();
+        //base.OnAfterRender(firstRender);
+        if (firstRender)
+        {
+            //See warning about memory above in the article
+            // Create a reference to this component which will allow JSRuntime to access it.
+            var gameBoardObjectReference = DotNetObjectReference.Create(this);
+
+            await JSRuntime.InvokeVoidAsync("addKeyDownEventListener", gameBoardObjectReference);
+
+            Gameboard.SpawnSnake();
+        }
     }
 
-    private void SpawnSnake()
+    // This annotation allows it to be called from JavaScript.
+    [JSInvokable ("HandleKeyPress")]
+    public async Task HandleKeyPress (string key)
     {
-        Gameboard.CellComponents.Where(c => c.X == 7 && c.Y == 7).Single().CellType = CellType.Snake;
-        Gameboard.CellComponents.Where(c => c.X == 7 && c.Y == 8).Single().CellType = CellType.Snake;
-        Gameboard.CellComponents.Where(c => c.X == 7 && c.Y == 9).Single().CellType = CellType.Snake;
+
     }
 }
