@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel;
 using System.Drawing;
 
-namespace SnakeMobile.Domain.Model
+namespace SnakeBlz.Domain
 {
-    public class Cell : INotifyPropertyChanged
+    public class CellComponent : INotifyPropertyChanged
     {
         public int PositionX { get; private set; }
         public int PositionY { get; private set; }
@@ -20,7 +20,7 @@ namespace SnakeMobile.Domain.Model
             }
         }
 
-        public Cell(int positionX, int positionY)
+        public CellComponent(int positionX, int positionY)
         {
             PositionX = positionX;
             PositionY = positionY;

@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SnakeMobile.Domain.Model
+namespace SnakeBlz.Domain
 {
     public class Game : INotifyPropertyChanged
     {
@@ -43,7 +43,7 @@ namespace SnakeMobile.Domain.Model
 
                 Score = GameBoard.Snake.CountPelletsConsumed;
 
-                System.Threading.Thread.Sleep(200);
+                Thread.Sleep(200);
             } while (!GameBoard.IsInIllegalState);
 
             endTime = DateTime.UtcNow;

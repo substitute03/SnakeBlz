@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SnakeBlz.Components;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
@@ -9,7 +10,7 @@ namespace SnakeBlz.Domain
     public class Snake
     {
         public static readonly Color UnitColor = Color.ForestGreen;
-        public LinkedList<CellComponent> Cells { get; set; }
+        public LinkedList<CellComponent> Cells { get; set; } = new();
         public Direction CurrentDirection { get; set; } = Direction.Left;
         public bool IsOutOfBounds { get; set; } = false;
         public bool HasCollidedWithSelf { get; set; } = false;
@@ -28,16 +29,6 @@ namespace SnakeBlz.Domain
         public CellComponent Tail => Cells.Last.Value;
 
         public Snake() { }
-
-        public Task Render()
-        {
-            foreach (var cell in Cells)
-            {
-                cell.Color = UnitColor;
-            }
-
-            return Task.CompletedTask;
-        }
 
         public void ChangeDirection(Direction direction)
         {

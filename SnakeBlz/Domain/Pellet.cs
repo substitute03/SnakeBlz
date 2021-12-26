@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SnakeBlz.Components;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
@@ -12,9 +13,9 @@ namespace SnakeBlz.Domain
 
         public Pellet() { }
 
-        public void Render()
-        {
-            Cell.Color = UnitColor;
-        }
+        //public void Render()
+        //{
+        //    Cell.Color = UnitColor;
+        //}
     }
 }

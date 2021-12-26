@@ -7,9 +7,9 @@
 <div class="container d-flex justify-content-center">
     <div class="gameboard">
 
-        @for (int x = 1; x <= GameboardSize; x++)
+        @for (int y = 1; y <= GameboardSize; y++)
         {
-            for (int y = 1; y <= GameboardSize; y++)
+            for (int x = 1; x <= GameboardSize; x++)
             {
                 <CellComponent @ref="SetComponentRef" X="x" Y="y"></CellComponent>                  
             }

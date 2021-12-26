@@ -6,27 +6,27 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SnakeMobile.Domain.Model
+namespace SnakeBlz.Domain
 {
     public class GameBoard
     {
-        public ObservableCollection<Cell> Cells { get; set; }
+        public ObservableCollection<CellComponent> Cells { get; set; }
         public Snake Snake { get; set; }
         public Pellet Pellet { get; set; }
         public int Size { get; private set; }
-        public int Length => (Size * Size) - 1;
+        public int Length => Size * Size - 1;
         public bool IsInIllegalState => Snake.IsOutOfBounds || Snake.HasCollidedWithSelf;
 
         public GameBoard Create(int gameBoardSize)
         {
             Size = gameBoardSize;
-            Cells = new ObservableCollection<Cell>();
+            Cells = new ObservableCollection<CellComponent>();
 
             for (int x = 0; x <= Size - 1; x++)
             {
                 for (int y = 0; y <= Size - 1; y++)
                 {
-                    Cells.Add(new Cell(x, y));
+                    Cells.Add(new CellComponent(x, y));
                 }
             }
 
@@ -36,7 +36,7 @@ namespace SnakeMobile.Domain.Model
         public void SpawnSnake()
         {
             Snake = new Snake();
-            var cells = new LinkedList<Cell>();
+            var cells = new LinkedList<CellComponent>();
 
             cells.AddLast(Cells[GetCellIndex(7, 7)]);
             cells.AddLast(Cells[GetCellIndex(7, 8)]);
@@ -80,11 +80,11 @@ namespace SnakeMobile.Domain.Model
                 return;
             }
 
-            Cell moveToCell = await GetAdjacentCell(directionToMove, Snake.Head);
+            CellComponent moveToCell = await GetAdjacentCell(directionToMove, Snake.Head);
 
             if (moveToCell.IsEmpty)
             {
-                Snake.Tail.Color = Cell.UnitColor;
+                Snake.Tail.Color = CellComponent.UnitColor;
                 Snake.Cells.Remove(Snake.Tail);
             }
             else if (moveToCell.Color == Snake.UnitColor)
@@ -102,7 +102,7 @@ namespace SnakeMobile.Domain.Model
             await Snake.Render();
         }
 
-        private Task<Cell> GetAdjacentCell(Direction direction, Cell cell)
+        private Task<CellComponent> GetAdjacentCell(Direction direction, CellComponent cell)
         {
             int x = cell.PositionX;
             int y = cell.PositionY;
@@ -125,7 +125,7 @@ namespace SnakeMobile.Domain.Model
             }
         }
 
-        private Task<bool> IsAdjacentCellOutOfBounds(Direction direction, Cell cell)
+        private Task<bool> IsAdjacentCellOutOfBounds(Direction direction, CellComponent cell)
         {
             int x = cell.PositionX;
             int y = cell.PositionY;

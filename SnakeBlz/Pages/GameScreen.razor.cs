@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using SnakeBlz.Components;
-using SnakeMobile.Domain.Model;
+using SnakeBlz.Domain;
 using System.Collections.ObjectModel;
 using static SnakeBlz.Domain.Enums;
 
