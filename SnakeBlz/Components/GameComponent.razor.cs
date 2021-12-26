@@ -24,10 +24,8 @@ public partial class GameComponent : IDisposable
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        //base.OnAfterRender(firstRender);
         if (firstRender)
         {
-            //See warning about memory above in the article
             // Create a reference to this component which will allow JSRuntime to access it.
             gameboardObjectReference = DotNetObjectReference.Create(this);
 

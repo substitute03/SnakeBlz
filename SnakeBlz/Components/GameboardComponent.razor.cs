@@ -11,11 +11,7 @@ namespace SnakeBlz.Components
         [Parameter] public EventCallback SpawnPellet { get; set; }
 
         public Snake Snake { get; set; }
-        public Pellet Pellet { get; set; }
-
-        public int Length => (GameboardSize * GameboardSize) - 1;
         public bool IsInIllegalState => Snake.IsOutOfBounds || Snake.HasCollidedWithSelf;
-
         public List<CellComponent> Cells { get; set; } = new();
 
         private CellComponent SetComponentRef
