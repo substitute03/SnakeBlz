@@ -1,16 +1,27 @@
 ﻿@page "/"
-
+@using Domain;
 @inject IJSRuntime JSRuntime
 
-<div class="d-flex justify-content-center">
-    <h2>SnakeBlz <img src=/icon-192.png height="75" width="75"/></h2>
-</div>
-
 <div class="container">
+    <div class="row col-lg-12 text-center">
+        <h2>SnakeBlz <img src=/icon-192.png height="75" width="75"/></h2>
+    </div>
     <div class="row col-lg-12 text-center">
             <h2>Score: @Score</h2>
     </div>
 </div>
 
-
 <GameboardComponent SpawnPellet="@SpawnPellet" @ref="Gameboard"></GameboardComponent>
+
+<div class="container">
+    <div class="row col-lg-12 text-center">
+        <h1>@Message</h1>
+    </div>
+
+    @if (GameState == Enums.GameState.GameOver)
+    {
+        <div class="row col-lg-2 offset-lg-5 text-center">
+            <button type="button" class="btn btn-secondary" @onclick="StartNewGame">Play Again</button>
+        </div>
+    }
+</div>

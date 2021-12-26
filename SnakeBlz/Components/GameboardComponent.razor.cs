@@ -30,6 +30,14 @@ namespace SnakeBlz.Components
         {
         }
 
+        public void ClearCells()
+        {
+            foreach (var cell in Cells)
+            {
+                cell.CellType = CellType.Empty;
+            }
+        }
+
         public async Task MoveSnake(Direction directionToMove)
         {
             //Direction directionToMove = Snake.DirectionToMove;

@@ -11,14 +11,14 @@ public partial class GameComponent
     private GameboardComponent Gameboard { get; set; }
     private int InputDelayInMilliseconds { get; set; } = 100;
     private int Score { get; set; } = 0;
+    private string Message { get; set; }
+    private GameState GameState { get; set; }
     private TimeOnly StartTime { get; set; }
     private TimeOnly EndTime { get; set; }
+    private TimeSpan Duration => EndTime - StartTime;
     private LinkedList<string> StoredKeyPresses { get; set; } = new();
 
-    protected override async Task OnInitializedAsync()
-    {
-
-    }
+    protected override async Task OnInitializedAsync(){}
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -31,18 +31,35 @@ public partial class GameComponent
 
             await JSRuntime.InvokeVoidAsync("addKeyDownEventListener", gameBoardObjectReference);
 
-            SpawnSnake();
-            SpawnPellet();
-            await StartGameLoop();
+            StartNewGame();
         }
     }
+
+    private async Task StartNewGame()
+    {
+        GameState = GameState.InProgress;
+
+        ClearGameboard();
+        await PlayCountdown();
+        SpawnSnake();
+        SpawnPellet();
+        await StartGameLoop();
+
+        GameState = GameState.GameOver;
+    }
+
+    private void ClearGameboard()
+    {
+        Gameboard.ClearCells();
+    }
+
     public void SpawnSnake()
     {
         Gameboard.Snake = new Snake();
 
-        CellComponent cell1 = Gameboard.Cells.Where(c => c.X == 7 && c.Y == 7).Single();
-        CellComponent cell2 = Gameboard.Cells.Where(c => c.X == 8 && c.Y == 7).Single();
-        CellComponent cell3 = Gameboard.Cells.Where(c => c.X == 9 && c.Y == 7).Single();
+        CellComponent cell1 = Gameboard.Cells.Where(c => c.X == 12 && c.Y == 7).Single();
+        CellComponent cell2 = Gameboard.Cells.Where(c => c.X == 13 && c.Y == 7).Single();
+        CellComponent cell3 = Gameboard.Cells.Where(c => c.X == 14 && c.Y == 7).Single();
 
         // Set Gameboard cells to CellType.Snake.
         cell1.CellType = CellType.Snake;
@@ -82,6 +99,24 @@ public partial class GameComponent
         };
     }
 
+    private async Task PlayCountdown()
+    {
+        Message = "Starting in...3";
+        StateHasChanged();
+        await Task.Delay(1000);
+        Message = "Starting in...2";
+        StateHasChanged();
+        await Task.Delay(1000);
+        Message = "Starting in...1";
+        StateHasChanged();
+        await Task.Delay(1000);
+        Message = "Go!";
+        StateHasChanged();
+        await Task.Delay(1000);
+        Message = "";
+        StateHasChanged();
+    }
+
     public async Task StartGameLoop()
     {
         StartTime = new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
@@ -105,8 +140,11 @@ public partial class GameComponent
         } while (!Gameboard.IsInIllegalState);
 
         EndTime = new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
+        GameResults results = new GameResults(Score, Duration);
+        GameState = GameState.GameOver;
+        Message = $"Game over! Duration {Duration}.";
 
-        //GameResults results = new GameResults(Score, Duration);
+        StateHasChanged();
 
         //return results;
     }
@@ -147,68 +185,5 @@ public partial class GameComponent
 
         StoredKeyPresses.AddLast(key);
         StateHasChanged();
-
-        //foreach (var keyPress in StoredKeyPresses)
-        //{
-        //    if (keyPress == "w")
-        //    {
-        //        Gameboard.Snake.ChangeDirection(Direction.Up);
-        //    }
-        //    else if (keyPress == "a")
-        //    {
-        //        Gameboard.Snake.ChangeDirection(Direction.Left);
-        //    }
-        //    else if (keyPress == "s")
-        //    {
-        //        Gameboard.Snake.ChangeDirection(Direction.Down);
-        //    }
-        //    else if (keyPress == "d")
-        //    {
-        //        Gameboard.Snake.ChangeDirection(Direction.Right);
-        //    }
-
-        //    //await Task.Delay(InputDelayInMilliseconds);
-        //}
-
-        //if (StoredKeyPresses.First() == "w")
-        //{
-        //    Gameboard.Snake.ChangeDirection(Direction.Up);
-        //    StoredKeyPresses.RemoveFirst();
-
-        //    if (StoredKeyPresses.Count() == 0)
-        //    {
-        //        return;
-        //    }
-        //}
-        //else if (StoredKeyPresses.First() == "a")
-        //{
-        //    Gameboard.Snake.ChangeDirection(Direction.Left);
-        //    StoredKeyPresses.RemoveFirst();
-
-        //    if (StoredKeyPresses.Count() == 0)
-        //    {
-        //        return;
-        //    }
-        //}
-        //else if (StoredKeyPresses.First() == "s")
-        //{
-        //    Gameboard.Snake.ChangeDirection(Direction.Down);
-        //    StoredKeyPresses.RemoveFirst();
-
-        //    if (StoredKeyPresses.Count() == 0)
-        //    {
-        //        return;
-        //    }
-        //}
-        //else if (StoredKeyPresses.First() == "d")
-        //{
-        //    Gameboard.Snake.ChangeDirection(Direction.Right);
-        //    StoredKeyPresses.RemoveFirst();
-
-        //    if (StoredKeyPresses.Count() == 0)
-        //    {
-        //        return;
-        //    }
-        //}
     }
 }

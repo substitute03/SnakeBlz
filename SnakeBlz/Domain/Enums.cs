@@ -14,5 +14,11 @@ namespace SnakeBlz.Domain
             Snake,
             Pellet
         }
+
+        public enum GameState
+        {
+            InProgress,
+            GameOver
+        }
     }
 }
