@@ -30,9 +30,14 @@ namespace SnakeBlz.Components
         {
         }
 
-        public async Task MoveSnake()
+        public async Task MoveSnake(Direction directionToMove)
         {
-            Direction directionToMove = Snake.DirectionToMove;
+            //Direction directionToMove = Snake.DirectionToMove;
+
+            if (directionToMove == Direction.None)
+            {
+                directionToMove = Snake.CurrentDirection;
+            }
 
             if (await IsAdjacentCellOutOfBounds(directionToMove, Snake.Head))
             {

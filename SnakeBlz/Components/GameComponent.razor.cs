@@ -9,8 +9,11 @@ namespace SnakeBlz.Components;
 public partial class GameComponent
 {
     private GameboardComponent Gameboard { get; set; }
+    private int InputDelayInMilliseconds { get; set; } = 100;
+    private int Score { get; set; } = 0;
     private TimeOnly StartTime { get; set; }
     private TimeOnly EndTime { get; set; }
+    private LinkedList<string> StoredKeyPresses { get; set; } = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -85,12 +88,19 @@ public partial class GameComponent
 
         do
         {
-            await Gameboard.MoveSnake();
+            Direction nextDirection = Direction.FromKey(StoredKeyPresses.FirstOrDefault());
+
+            if (StoredKeyPresses.Count > 0)
+            {
+                StoredKeyPresses.RemoveFirst();
+            }
+
+            await Gameboard.MoveSnake(nextDirection);
             StateHasChanged();
 
-            //Score = GameBoard.Snake.CountPelletsConsumed;
+            Score = Gameboard.Snake.CountPelletsConsumed;
 
-            await Task.Delay(75);
+            await Task.Delay(InputDelayInMilliseconds);
 
         } while (!Gameboard.IsInIllegalState);
 
@@ -105,21 +115,100 @@ public partial class GameComponent
     [JSInvokable ("HandleKeyPress")]
     public async Task HandleKeyPress (string key)
     {
-        if (key == "w")
+        if (!"wasd".Contains(key))
         {
-            Gameboard.Snake.ChangeDirection(Direction.Up);
+            return;
         }
-        else if (key == "a")
+
+        Direction directionToMove = Direction.FromKey(key);
+        Direction nextDirection = Direction.FromKey(StoredKeyPresses.FirstOrDefault());
+
+        if (StoredKeyPresses.Count == 0)
         {
-            Gameboard.Snake.ChangeDirection(Direction.Left);
+            if (Gameboard.Snake.CurrentDirection.IsEqualTo(directionToMove) ||
+                Gameboard.Snake.CurrentDirection.IsOppositeTo(directionToMove))
+            {
+                return;
+            }
         }
-        else if (key == "s")
+        else if (StoredKeyPresses.Count > 0)
         {
-            Gameboard.Snake.ChangeDirection(Direction.Down);
+            if (nextDirection.IsEqualTo(directionToMove) 
+                || nextDirection.IsOppositeTo(directionToMove))
+            {
+                return;
+            }
         }
-        else if (key == "d")
+
+        if (StoredKeyPresses.Count == 2)
         {
-            Gameboard.Snake.ChangeDirection(Direction.Right);
+            StoredKeyPresses.RemoveFirst();
         }
+
+        StoredKeyPresses.AddLast(key);
+        StateHasChanged();
+
+        //foreach (var keyPress in StoredKeyPresses)
+        //{
+        //    if (keyPress == "w")
+        //    {
+        //        Gameboard.Snake.ChangeDirection(Direction.Up);
+        //    }
+        //    else if (keyPress == "a")
+        //    {
+        //        Gameboard.Snake.ChangeDirection(Direction.Left);
+        //    }
+        //    else if (keyPress == "s")
+        //    {
+        //        Gameboard.Snake.ChangeDirection(Direction.Down);
+        //    }
+        //    else if (keyPress == "d")
+        //    {
+        //        Gameboard.Snake.ChangeDirection(Direction.Right);
+        //    }
+
+        //    //await Task.Delay(InputDelayInMilliseconds);
+        //}
+
+        //if (StoredKeyPresses.First() == "w")
+        //{
+        //    Gameboard.Snake.ChangeDirection(Direction.Up);
+        //    StoredKeyPresses.RemoveFirst();
+
+        //    if (StoredKeyPresses.Count() == 0)
+        //    {
+        //        return;
+        //    }
+        //}
+        //else if (StoredKeyPresses.First() == "a")
+        //{
+        //    Gameboard.Snake.ChangeDirection(Direction.Left);
+        //    StoredKeyPresses.RemoveFirst();
+
+        //    if (StoredKeyPresses.Count() == 0)
+        //    {
+        //        return;
+        //    }
+        //}
+        //else if (StoredKeyPresses.First() == "s")
+        //{
+        //    Gameboard.Snake.ChangeDirection(Direction.Down);
+        //    StoredKeyPresses.RemoveFirst();
+
+        //    if (StoredKeyPresses.Count() == 0)
+        //    {
+        //        return;
+        //    }
+        //}
+        //else if (StoredKeyPresses.First() == "d")
+        //{
+        //    Gameboard.Snake.ChangeDirection(Direction.Right);
+        //    StoredKeyPresses.RemoveFirst();
+
+        //    if (StoredKeyPresses.Count() == 0)
+        //    {
+        //        return;
+        //    }
+        //}
     }
 }
