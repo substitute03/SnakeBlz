@@ -22,5 +22,15 @@
 
             return sumOfIds == 3 || sumOfIds == 7;
         }
+
+        public bool IsEqualTo(Direction direction)
+        {
+            return Id == direction.Id;
+        }
+
+        public bool IsNotEqualTo(Direction direction)
+        {
+            return Id != direction.Id;
+        }
     }
 }

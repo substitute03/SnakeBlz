@@ -32,7 +32,7 @@ namespace SnakeBlz.Components
 
         public async Task MoveSnake()
         {
-            Direction directionToMove = Snake.CurrentDirection;
+            Direction directionToMove = Snake.DirectionToMove;
 
             if (await IsAdjacentCellOutOfBounds(directionToMove, Snake.Head))
             {
@@ -44,6 +44,7 @@ namespace SnakeBlz.Components
 
             if (moveToCell.CellType == CellType.Empty)
             {
+                Snake.CurrentDirection = directionToMove;
                 Snake.Tail.CellType = CellType.Empty;
                 Snake.Cells.Remove(Snake.Tail);
             }
@@ -54,6 +55,7 @@ namespace SnakeBlz.Components
             }
             else if (moveToCell.CellType == CellType.Pellet)
             {
+                Snake.CurrentDirection = directionToMove;
                 Snake.ConsumePellet();
                 await SpawnPellet.InvokeAsync();
             }

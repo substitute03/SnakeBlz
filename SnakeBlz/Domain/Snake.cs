@@ -12,6 +12,7 @@ namespace SnakeBlz.Domain
         public static readonly Color UnitColor = Color.ForestGreen;
         public LinkedList<CellComponent> Cells { get; set; } = new();
         public Direction CurrentDirection { get; set; } = Direction.Left;
+        public Direction DirectionToMove { get; set; } = Direction.Left;
         public bool IsOutOfBounds { get; set; } = false;
         public bool HasCollidedWithSelf { get; set; } = false;
 
@@ -33,7 +34,9 @@ namespace SnakeBlz.Domain
         public void ChangeDirection(Direction direction)
         {
             if (!direction.IsOppositeTo(CurrentDirection))
-                CurrentDirection = direction;
+            {
+                DirectionToMove = direction;
+            }
         }
 
         public void ConsumePellet()

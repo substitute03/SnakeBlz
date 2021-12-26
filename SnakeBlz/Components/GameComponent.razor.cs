@@ -90,7 +90,7 @@ public partial class GameComponent
 
             //Score = GameBoard.Snake.CountPelletsConsumed;
 
-            await Task.Delay(100);
+            await Task.Delay(75);
 
         } while (!Gameboard.IsInIllegalState);
 
