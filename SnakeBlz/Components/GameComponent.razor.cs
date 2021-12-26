@@ -6,9 +6,11 @@ using static SnakeBlz.Domain.Enums;
 
 namespace SnakeBlz.Components;
 
-public partial class GameComponent
+public partial class GameComponent : IDisposable
 {
     private GameboardComponent Gameboard { get; set; }
+    private DotNetObjectReference<GameComponent> gameboardObjectReference;
+
     private int InputDelayInMilliseconds { get; set; } = 100;
     private int Score { get; set; } = 0;
     private string Message { get; set; }
@@ -27,9 +29,9 @@ public partial class GameComponent
         {
             //See warning about memory above in the article
             // Create a reference to this component which will allow JSRuntime to access it.
-            var gameBoardObjectReference = DotNetObjectReference.Create(this);
+            gameboardObjectReference = DotNetObjectReference.Create(this);
 
-            await JSRuntime.InvokeVoidAsync("addKeyDownEventListener", gameBoardObjectReference);
+            await JSRuntime.InvokeVoidAsync("addKeyDownEventListener", gameboardObjectReference);
 
             StartNewGame();
         }
@@ -185,5 +187,10 @@ public partial class GameComponent
 
         StoredKeyPresses.AddLast(key);
         StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        gameboardObjectReference.Dispose();
     }
 }

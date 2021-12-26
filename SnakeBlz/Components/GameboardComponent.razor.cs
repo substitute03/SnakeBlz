@@ -26,9 +26,7 @@ namespace SnakeBlz.Components
             }
         }
 
-        protected override void OnInitialized()
-        {
-        }
+        protected override void OnInitialized(){}
 
         public void ClearCells()
         {
@@ -40,8 +38,6 @@ namespace SnakeBlz.Components
 
         public async Task MoveSnake(Direction directionToMove)
         {
-            //Direction directionToMove = Snake.DirectionToMove;
-
             if (directionToMove == Direction.None)
             {
                 directionToMove = Snake.CurrentDirection;
