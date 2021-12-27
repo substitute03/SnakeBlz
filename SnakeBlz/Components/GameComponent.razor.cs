@@ -148,7 +148,9 @@ public partial class GameComponent : IDisposable
 
         } while (!Gameboard.IsInIllegalState);
 
+
         EndTime = new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
+        PlaySound("gameOver");
         GameResults results = new GameResults(Score, Duration);
         GameState = GameState.GameOver;
         Message = $"Game over! Duration {Duration}.";
