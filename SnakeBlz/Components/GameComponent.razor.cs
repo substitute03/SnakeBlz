@@ -106,18 +106,26 @@ public partial class GameComponent : IDisposable
 
     private async Task PlayCountdown()
     {
+        PlaySound("countdownInProgress");
         Message = "Starting in...3";
         StateHasChanged();
         await Task.Delay(1000);
+
+        PlaySound("countdownInProgress");
         Message = "Starting in...2";
         StateHasChanged();
         await Task.Delay(1000);
+
+        PlaySound("countdownInProgress");
         Message = "Starting in...1";
         StateHasChanged();
         await Task.Delay(1000);
+
+        PlaySound("countdownEnd");
         Message = "Go!";
         StateHasChanged();
         await Task.Delay(1000);
+
         Message = String.Empty;
         StateHasChanged();
     }
@@ -150,14 +158,19 @@ public partial class GameComponent : IDisposable
 
 
         EndTime = new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
+
+        await HandleGameOver();
+   
+        //return results;
+    }
+
+    private async Task HandleGameOver()
+    {
         PlaySound("gameOver");
         GameResults results = new GameResults(Score, Duration);
         GameState = GameState.GameOver;
         Message = $"Game over! Duration {Duration}.";
-
         StateHasChanged();
-
-        //return results;
     }
 
     // This annotation allows it to be called from JavaScript.
