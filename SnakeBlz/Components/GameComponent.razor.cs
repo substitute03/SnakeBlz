@@ -10,11 +10,14 @@ public partial class GameComponent : IDisposable
 {
     private GameboardComponent Gameboard { get; set; }
     private DotNetObjectReference<GameComponent> gameboardObjectReference;
+    private CancellationTokenSource BlazingStatusCancellationTokenSource { get; set; }
+    private CancellationToken CancellationToken { get; set; }
 
     private int SnakeSpeedInMilliseconds { get; set; } = 80;
     private bool AllowInput => GameState == GameState.InProgress;
     private int Score { get; set; } = 0;
     private string Message { get; set; }
+    private GameMode GameMode { get; set; } = GameMode.Normal;
     private GameState GameState { get; set; }
     private TimeOnly StartTime { get; set; }
     private TimeOnly EndTime { get; set; }
@@ -38,6 +41,7 @@ public partial class GameComponent : IDisposable
     {
         GameState = GameState.InProgress;
 
+        BlazingStatusCancellationTokenSource = new();
         ClearGameboard();
         await PlayCountdown();
         SpawnSnake();
@@ -51,6 +55,7 @@ public partial class GameComponent : IDisposable
     {
         Gameboard.ClearCells();
         Score = 0;
+        StoredKeyPresses.Clear();
     }
 
     public void SpawnSnake()
@@ -77,6 +82,14 @@ public partial class GameComponent : IDisposable
         if (Gameboard.Snake.CountPelletsConsumed > 0)
         {
             PlaySound("consumePellet");
+
+            if (GameMode == GameMode.Blazor && Gameboard.Snake.CountPelletsConsumed % 10 == 0)
+            {
+                BlazingStatusCancellationTokenSource = new CancellationTokenSource();
+                CancellationToken = BlazingStatusCancellationTokenSource.Token;
+
+                HandleBlazingStatus(CancellationToken);
+            }
         }
 
         Point emptyCellPoint =
@@ -130,6 +143,38 @@ public partial class GameComponent : IDisposable
         StateHasChanged();
     }
 
+    private async Task HandleBlazingStatus(CancellationToken token)
+    {
+        Task handle = Task.Run(async() =>
+        {
+            Gameboard.Snake.IsBlazing = true;
+
+            foreach (var cell in Gameboard.Cells.Where(c => c.CellType == CellType.Snake))
+            {
+                cell.CellType = CellType.BlazingSnake;
+            }
+
+            string secondsRemaining;
+            for (int i = 0; i < 5; i++)
+            {
+                token.ThrowIfCancellationRequested();
+                secondsRemaining = (5 - i).ToString();
+                Message = $"Blazing ends in {secondsRemaining}";
+                StateHasChanged();
+                await Task.Delay(1000);
+            }
+
+            foreach (var cell in Gameboard.Cells.Where(c => c.CellType == CellType.BlazingSnake))
+            {
+                cell.CellType = CellType.Snake;
+            }
+
+            Message = String.Empty;
+            Gameboard.Snake.IsBlazing = false;
+            BlazingStatusCancellationTokenSource.Dispose();
+        }, token);
+    }
+
     private async Task PlaySound(string soundName)
     {
         await JSRuntime.InvokeVoidAsync("playAudio", soundName);
@@ -167,6 +212,12 @@ public partial class GameComponent : IDisposable
     private async Task HandleGameOver()
     {
         PlaySound("gameOver");
+
+        if (BlazingStatusCancellationTokenSource != null)
+        {
+            BlazingStatusCancellationTokenSource.Cancel();
+        }
+        
         GameResults results = new GameResults(Score, Duration);
         GameState = GameState.GameOver;
         Message = $"Game over! Duration {Duration}.";

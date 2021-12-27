@@ -81,6 +81,9 @@ a, .btn-link {
         .gameboard > .cell.Snake {
             background-color: green;
         }
+        .gameboard > .cell.BlazingSnake {
+            background-color: orange;
+        }
         .gameboard > .cell.Empty {
             background-color: white;
         }

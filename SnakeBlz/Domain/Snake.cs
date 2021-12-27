@@ -15,6 +15,7 @@ namespace SnakeBlz.Domain
         public Direction DirectionToMove { get; set; } = Direction.Left;
         public bool IsOutOfBounds { get; set; } = false;
         public bool HasCollidedWithSelf { get; set; } = false;
+        public bool IsBlazing { get; set; } = false;
 
         private int _countPelletsConsumed;
         public int CountPelletsConsumed
@@ -41,7 +42,14 @@ namespace SnakeBlz.Domain
 
         public void ConsumePellet()
         {
-            CountPelletsConsumed++;
+            if (IsBlazing)
+            {
+                CountPelletsConsumed += 2;
+            }
+            else
+            {
+                CountPelletsConsumed++;
+            }
         }
     }
 }

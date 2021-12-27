@@ -12,6 +12,7 @@ namespace SnakeBlz.Domain
         {
             Empty,
             Snake,
+            BlazingSnake,
             Pellet
         }
 
@@ -20,6 +21,12 @@ namespace SnakeBlz.Domain
             PreGame,
             InProgress,
             GameOver
+        }
+
+        public enum GameMode
+        {
+            Normal,
+            Blazor
         }
     }
 }

@@ -53,7 +53,7 @@ namespace SnakeBlz.Components
                 Snake.Tail.CellType = CellType.Empty;
                 Snake.Cells.Remove(Snake.Tail);
             }
-            else if (moveToCell.CellType == CellType.Snake)
+            else if (moveToCell.CellType == CellType.Snake || moveToCell.CellType == CellType.BlazingSnake)
             {
                 Snake.HasCollidedWithSelf = true;
                 return;
@@ -66,7 +66,7 @@ namespace SnakeBlz.Components
             }
 
             Snake.Cells.AddFirst(moveToCell);
-            Snake.Head.CellType = CellType.Snake;
+            Snake.Head.CellType = Snake.IsBlazing ? CellType.BlazingSnake : CellType.Snake;
 
             StateHasChanged();
         }
