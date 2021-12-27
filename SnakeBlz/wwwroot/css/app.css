@@ -102,4 +102,13 @@ a, .btn-link {
         border-bottom: 1px solid #000000;
         height: 50px;
         width: 50px;*/
-    }
+
+.center-in-viewport {
+    display: block;
+    position: fixed;
+    z-index: 1031; /* High z-index so it is on top of the page */
+    top: 50%;
+    right: 50%; /* or: left: 50%; */
+    margin-top: -..px; /* half of the elements height */
+    margin-right: -..px; /* half of the elements widht */
+}
