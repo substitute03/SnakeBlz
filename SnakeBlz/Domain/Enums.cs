@@ -17,6 +17,7 @@ namespace SnakeBlz.Domain
 
         public enum GameState
         {
+            PreGame,
             InProgress,
             GameOver
         }

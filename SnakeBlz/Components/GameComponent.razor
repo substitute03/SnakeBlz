@@ -14,14 +14,15 @@
 <GameboardComponent SpawnPellet="@SpawnPellet" @ref="Gameboard"></GameboardComponent>
 
 <div class="container">
-    <div class="row col-lg-12 text-center">
+    <div class="row col-lg-12 text-center mt-3">
         <h1>@Message</h1>
     </div>
 
-    @if (GameState == Enums.GameState.GameOver)
+    @if (GameState == Enums.GameState.PreGame || GameState == Enums.GameState.GameOver)
     {
-        <div class="row col-lg-2 offset-lg-5 text-center">
-            <button type="button" class="btn btn-secondary" @onclick="StartNewGame">Play Again</button>
-        </div>
+        <div class="row col-lg-2 offset-lg-5 text-center mt-3">
+            <button type="button" class="btn btn-secondary" @onclick="StartNewGame">Play</button>
+        </div> 
     }
+
 </div>

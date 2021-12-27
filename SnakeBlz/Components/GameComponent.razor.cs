@@ -12,6 +12,7 @@ public partial class GameComponent : IDisposable
     private DotNetObjectReference<GameComponent> gameboardObjectReference;
 
     private int InputDelayInMilliseconds { get; set; } = 100;
+    private bool AllowInput => GameState == GameState.InProgress;
     private int Score { get; set; } = 0;
     private string Message { get; set; }
     private GameState GameState { get; set; }
@@ -30,8 +31,6 @@ public partial class GameComponent : IDisposable
             gameboardObjectReference = DotNetObjectReference.Create(this);
 
             await JSRuntime.InvokeVoidAsync("addKeyDownEventListener", gameboardObjectReference);
-
-            StartNewGame();
         }
     }
 
@@ -51,6 +50,7 @@ public partial class GameComponent : IDisposable
     private void ClearGameboard()
     {
         Gameboard.ClearCells();
+        Score = 0;
     }
 
     public void SpawnSnake()
@@ -153,6 +153,11 @@ public partial class GameComponent : IDisposable
     [JSInvokable ("HandleKeyPress")]
     public async Task HandleKeyPress (string key)
     {
+        if (!AllowInput)
+        {
+            return;
+        }
+
         if (!"wasd".Contains(key))
         {
             return;
