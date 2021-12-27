@@ -11,7 +11,7 @@ public partial class GameComponent : IDisposable
     private GameboardComponent Gameboard { get; set; }
     private DotNetObjectReference<GameComponent> gameboardObjectReference;
 
-    private int InputDelayInMilliseconds { get; set; } = 100;
+    private int SnakeSpeedInMilliseconds { get; set; } = 80;
     private bool AllowInput => GameState == GameState.InProgress;
     private int Score { get; set; } = 0;
     private string Message { get; set; }
@@ -74,6 +74,11 @@ public partial class GameComponent : IDisposable
 
     public void SpawnPellet()
     {
+        if (Gameboard.Snake.CountPelletsConsumed > 0)
+        {
+            PlaySound("consumePellet");
+        }
+
         Point emptyCellPoint =
             GetEmptyCellCoordinates();
 
@@ -113,8 +118,13 @@ public partial class GameComponent : IDisposable
         Message = "Go!";
         StateHasChanged();
         await Task.Delay(1000);
-        Message = "";
+        Message = String.Empty;
         StateHasChanged();
+    }
+
+    private async Task PlaySound(string soundName)
+    {
+        await JSRuntime.InvokeVoidAsync("playAudio", soundName);
     }
 
     public async Task StartGameLoop()
@@ -131,11 +141,10 @@ public partial class GameComponent : IDisposable
             }
 
             await Gameboard.MoveSnake(nextDirection);
-            StateHasChanged();
-
             Score = Gameboard.Snake.CountPelletsConsumed;
 
-            await Task.Delay(InputDelayInMilliseconds);
+            StateHasChanged();
+            await Task.Delay(SnakeSpeedInMilliseconds);
 
         } while (!Gameboard.IsInIllegalState);
 
