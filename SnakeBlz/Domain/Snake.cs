@@ -15,7 +15,9 @@ namespace SnakeBlz.Domain
         public Direction DirectionToMove { get; set; } = Direction.Left;
         public bool IsOutOfBounds { get; set; } = false;
         public bool HasCollidedWithSelf { get; set; } = false;
-        public bool IsBlazing { get; set; } = false;
+        //public bool IsBlazing { get; set; } = false;
+        public int BlazingStacks { get; set; } = 0;
+        public bool IsBlazing => BlazingStacks >= 5;
 
         private int _countPelletsConsumed;
         public int CountPelletsConsumed
@@ -31,6 +33,11 @@ namespace SnakeBlz.Domain
         public CellComponent Tail => Cells.Last.Value;
 
         public Snake() { }
+
+        public void ResetBlazingStacks()
+        {
+            BlazingStacks = 0;
+        }
 
         public void ChangeDirection(Direction direction)
         {
@@ -49,6 +56,7 @@ namespace SnakeBlz.Domain
             else
             {
                 CountPelletsConsumed++;
+                BlazingStacks++;
             }
         }
     }

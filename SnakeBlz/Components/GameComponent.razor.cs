@@ -8,6 +8,7 @@ namespace SnakeBlz.Components;
 
 public partial class GameComponent : IDisposable
 {
+    #region Properties
     private GameboardComponent Gameboard { get; set; }
     private DotNetObjectReference<GameComponent> gameboardObjectReference;
     private CancellationTokenSource BlazingStatusCancellationTokenSource { get; set; }
@@ -18,6 +19,8 @@ public partial class GameComponent : IDisposable
     private int Score { get; set; } = 0;
     private string Message { get; set; }
 
+    private int BlazingStatusCounter { get; set; } = 100;
+    private bool IsHandleBlazingStatusLoopRunning { get; set; }
     private int ProgressBarPercentageNumber { get; set; } = 0;
     private string ProgressBarPercentageString => $"{ProgressBarPercentageNumber}%";
 
@@ -27,6 +30,7 @@ public partial class GameComponent : IDisposable
     private TimeOnly EndTime { get; set; }
     private TimeSpan Duration => EndTime - StartTime;
     private LinkedList<string> StoredKeyPresses { get; set; } = new();
+    #endregion
 
     protected override async Task OnInitializedAsync(){}
 
@@ -45,18 +49,22 @@ public partial class GameComponent : IDisposable
     {
         GameState = GameState.InProgress;
 
-        BlazingStatusCancellationTokenSource = new();
-        ClearGameboard();
+        ResetGameStatus();
         await PlayCountdown();
         SpawnSnake();
         SpawnPellet();
+
         await StartGameLoop();
 
         GameState = GameState.GameOver;
     }
 
-    private void ClearGameboard()
+    private void ResetGameStatus()
     {
+        IsHandleBlazingStatusLoopRunning = false;
+        BlazingStatusCancellationTokenSource = new();
+        BlazingStatusCounter = 100;
+
         Gameboard.ClearCells();
         Score = 0;
         ProgressBarPercentageNumber = 0;
@@ -88,18 +96,19 @@ public partial class GameComponent : IDisposable
         {
             PlaySound("consumePellet");
 
-            if (GameMode == GameMode.Blazor && Gameboard.Snake.CountPelletsConsumed % 10 == 0)
+            if (GameMode == GameMode.Blazor && Gameboard.Snake.IsBlazing)
             {
-                // If Blazing is already active, cancel it first.
-                if (Gameboard.Snake.IsBlazing)
+                if (IsHandleBlazingStatusLoopRunning)
                 {
-                    BlazingStatusCancellationTokenSource.Cancel();
+                    BlazingStatusCounter += 20;
+                    StateHasChanged();
                 }
-
-                BlazingStatusCancellationTokenSource = new CancellationTokenSource();
-                CancellationToken = BlazingStatusCancellationTokenSource.Token;
-
-                HandleBlazingStatus(CancellationToken);
+                else
+                {
+                    BlazingStatusCancellationTokenSource = new CancellationTokenSource();
+                    CancellationToken = BlazingStatusCancellationTokenSource.Token;
+                    HandleBlazingStatus(CancellationToken);
+                }
             }
         }
 
@@ -158,7 +167,7 @@ public partial class GameComponent : IDisposable
     {
         Task handle = Task.Run(async() =>
         {
-            Gameboard.Snake.IsBlazing = true;
+            IsHandleBlazingStatusLoopRunning = true;
 
             foreach (var cell in Gameboard.Cells.Where(c => c.CellType == CellType.Snake))
             {
@@ -167,10 +176,14 @@ public partial class GameComponent : IDisposable
 
             PlaySound("countdownInProgress");
 
-            // This will loop for 5 seconds and update the progress bar every 0.05 seconds.
-            for (int i = 100; i >= 0; i--)
+            // This will loop for a default of 5 seconds and update the progress bar every 0.05 seconds.
+            // If pellets are consumed while Blazing status is active, the BlazinStatusCeilingCounter is increased, prolonging the Blazing status. 
+            for (int i = BlazingStatusCounter; i >= 0;)
             {
                 token.ThrowIfCancellationRequested();
+                i = BlazingStatusCounter;
+                i--;
+                BlazingStatusCounter--;
                 ProgressBarPercentageNumber = i;
                 StateHasChanged();
                 await Task.Delay(50);
@@ -181,10 +194,11 @@ public partial class GameComponent : IDisposable
                 cell.CellType = CellType.Snake;
             }
 
+            BlazingStatusCounter = 100;
+            Gameboard.Snake.ResetBlazingStacks();
             PlaySound("countdownEnd");
 
-            //Message = String.Empty;
-            Gameboard.Snake.IsBlazing = false;
+            IsHandleBlazingStatusLoopRunning = false;
         }, token);
     }
 
