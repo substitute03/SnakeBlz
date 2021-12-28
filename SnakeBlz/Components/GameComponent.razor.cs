@@ -88,8 +88,7 @@ public partial class GameComponent : IDisposable
         {
             PlaySound("consumePellet");
 
-            if (Gameboard.Snake.CountPelletsConsumed == 1
-                /*GameMode == GameMode.Blazor && Gameboard.Snake.CountPelletsConsumed % 10 == 0*/)
+            if (GameMode == GameMode.Blazor && Gameboard.Snake.CountPelletsConsumed % 10 == 0)
             {
                 BlazingStatusCancellationTokenSource = new CancellationTokenSource();
                 CancellationToken = BlazingStatusCancellationTokenSource.Token;
@@ -160,6 +159,8 @@ public partial class GameComponent : IDisposable
                 cell.CellType = CellType.BlazingSnake;
             }
 
+            PlaySound("countdownInProgress");
+
             // This will loop for 5 seconds and update the progress bar every 0.05 seconds.
             for (int i = 100; i >= 0; i--)
             {
@@ -173,6 +174,8 @@ public partial class GameComponent : IDisposable
             {
                 cell.CellType = CellType.Snake;
             }
+
+            PlaySound("countdownEnd");
 
             //Message = String.Empty;
             Gameboard.Snake.IsBlazing = false;
