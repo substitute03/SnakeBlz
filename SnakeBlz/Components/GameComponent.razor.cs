@@ -90,6 +90,12 @@ public partial class GameComponent : IDisposable
 
             if (GameMode == GameMode.Blazor && Gameboard.Snake.CountPelletsConsumed % 10 == 0)
             {
+                // If Blazing is already active, cancel it first.
+                if (Gameboard.Snake.IsBlazing)
+                {
+                    BlazingStatusCancellationTokenSource.Cancel();
+                }
+
                 BlazingStatusCancellationTokenSource = new CancellationTokenSource();
                 CancellationToken = BlazingStatusCancellationTokenSource.Token;
 
