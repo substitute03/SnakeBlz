@@ -115,3 +115,9 @@ a, .btn-link {
     margin-top: -..px; /* half of the elements height */
     margin-right: -..px; /* half of the elements widht */
 }
+
+
+/*Overwrite Bootstrap progress bar animation to make the transition faster.*/
+.progress-bar {
+    transition: width .02s ease !important;
+}

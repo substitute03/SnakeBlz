@@ -17,7 +17,11 @@ public partial class GameComponent : IDisposable
     private bool AllowInput => GameState == GameState.InProgress;
     private int Score { get; set; } = 0;
     private string Message { get; set; }
-    private GameMode GameMode { get; set; } = GameMode.Normal;
+
+    private int ProgressBarPercentageNumber { get; set; } = 0;
+    private string ProgressBarPercentageString => $"{ProgressBarPercentageNumber}%";
+
+    private GameMode GameMode { get; set; } = GameMode.Blazor;
     private GameState GameState { get; set; }
     private TimeOnly StartTime { get; set; }
     private TimeOnly EndTime { get; set; }
@@ -55,6 +59,7 @@ public partial class GameComponent : IDisposable
     {
         Gameboard.ClearCells();
         Score = 0;
+        ProgressBarPercentageNumber = 0;
         StoredKeyPresses.Clear();
     }
 
@@ -83,7 +88,8 @@ public partial class GameComponent : IDisposable
         {
             PlaySound("consumePellet");
 
-            if (GameMode == GameMode.Blazor && Gameboard.Snake.CountPelletsConsumed % 10 == 0)
+            if (Gameboard.Snake.CountPelletsConsumed == 1
+                /*GameMode == GameMode.Blazor && Gameboard.Snake.CountPelletsConsumed % 10 == 0*/)
             {
                 BlazingStatusCancellationTokenSource = new CancellationTokenSource();
                 CancellationToken = BlazingStatusCancellationTokenSource.Token;
@@ -154,14 +160,13 @@ public partial class GameComponent : IDisposable
                 cell.CellType = CellType.BlazingSnake;
             }
 
-            string secondsRemaining;
-            for (int i = 0; i < 5; i++)
+            // This will loop for 5 seconds and update the progress bar every 0.05 seconds.
+            for (int i = 100; i >= 0; i--)
             {
                 token.ThrowIfCancellationRequested();
-                secondsRemaining = (5 - i).ToString();
-                Message = $"Blazing ends in {secondsRemaining}";
+                ProgressBarPercentageNumber = i;
                 StateHasChanged();
-                await Task.Delay(1000);
+                await Task.Delay(50);
             }
 
             foreach (var cell in Gameboard.Cells.Where(c => c.CellType == CellType.BlazingSnake))
@@ -169,9 +174,8 @@ public partial class GameComponent : IDisposable
                 cell.CellType = CellType.Snake;
             }
 
-            Message = String.Empty;
+            //Message = String.Empty;
             Gameboard.Snake.IsBlazing = false;
-            BlazingStatusCancellationTokenSource.Dispose();
         }, token);
     }
 
