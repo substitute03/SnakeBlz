@@ -1,4 +1,4 @@
-﻿@page "/"
+﻿@page "/play/{_gameMode}"
 @using Domain;
 @inject IJSRuntime JSRuntime
 
@@ -30,7 +30,7 @@
     </div>
 </div>
 
-<GameboardComponent SpawnPellet="@SpawnPellet" @ref="Gameboard"></GameboardComponent>
+<GameboardComponent PelletConsumed="@SpawnPellet" @ref="Gameboard"></GameboardComponent>
 
 <div class="container">
     <div class="row col-lg-12 text-center mt-3">

@@ -1,0 +1,34 @@
+﻿@page "/"
+
+@if (!IsLoading)
+{
+   <div class="container d-flex justify-content-center">
+    <div class="container">
+
+        <div class="row col-lg-12 text-center">
+            <h2>SnakeBlz <img src=/icon-192.png height="75" width="75"/></h2>
+        </div>
+
+        <div class="row col-lg-2 offset-lg-5 mt-4 text-center">
+            <EditForm Model="SelectedOptions" OnValidSubmit="@HandleValidSubmit">
+
+                <div class="form-group">
+                    <label class="h5" for="gameMode">Game Mode</label>
+                    <InputSelect @bind-Value="@SelectedOptions.SelectedGameMode" class="form-select" aria-label="Game mode select">
+                        @foreach (var gameMode in GameModeOptions)
+                        {
+                            <option class="select-i">@gameMode</option>
+                        }
+                    </InputSelect>
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-secondary mt-4 d-sm-block">Play</button>
+                </div>
+
+            </EditForm>
+        </div>
+
+    </div>
+</div> 
+}

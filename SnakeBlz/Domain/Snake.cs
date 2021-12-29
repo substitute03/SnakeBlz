@@ -17,7 +17,8 @@ namespace SnakeBlz.Domain
         public bool HasCollidedWithSelf { get; set; } = false;
         //public bool IsBlazing { get; set; } = false;
         public int BlazingStacks { get; set; } = 0;
-        public bool IsBlazing => BlazingStacks >= 5;
+        public bool CanBlaze { get; set; }
+        public bool IsBlazing => CanBlaze && BlazingStacks >= 5;
 
         private int _countPelletsConsumed;
         public int CountPelletsConsumed

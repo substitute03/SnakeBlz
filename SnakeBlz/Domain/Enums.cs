@@ -25,7 +25,7 @@ namespace SnakeBlz.Domain
 
         public enum GameMode
         {
-            Normal,
+            Classic,
             Blazor
         }
     }

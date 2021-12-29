@@ -25,7 +25,15 @@ public partial class GameComponent : IDisposable
     private int ProgressBarPercentageNumber { get; set; } = 0;
     private string ProgressBarPercentageString => $"{ProgressBarPercentageNumber}%";
 
-    private GameMode GameMode { get; set; } = GameMode.Blazor;
+    [Parameter] public string _gameMode 
+    { 
+        set
+        {
+            GameMode = (Enums.GameMode)Enum.Parse(typeof(Enums.GameMode), value, true);
+        }
+    }
+    public GameMode GameMode { get; set; } = GameMode.Blazor;
+
     private GameState GameState { get; set; }
     private TimeOnly StartTime { get; set; }
     private TimeOnly EndTime { get; set; }
@@ -76,6 +84,11 @@ public partial class GameComponent : IDisposable
     {
         Gameboard.Snake = new Snake();
 
+        if (GameMode == GameMode.Blazor)
+        {
+            Gameboard.Snake.CanBlaze = true;
+        }
+
         CellComponent cell1 = Gameboard.Cells.Where(c => c.X == 12 && c.Y == 7).Single();
         CellComponent cell2 = Gameboard.Cells.Where(c => c.X == 13 && c.Y == 7).Single();
         CellComponent cell3 = Gameboard.Cells.Where(c => c.X == 14 && c.Y == 7).Single();
@@ -98,7 +111,7 @@ public partial class GameComponent : IDisposable
             PlaySound("consumePellet");
 
             if (GameMode == GameMode.Blazor && Gameboard.Snake.IsBlazing)
-            {
+            sdw{
                 if (IsHandleBlazingStatusLoopRunning)
                 {
                     BlazingStatusCounter += 20;
