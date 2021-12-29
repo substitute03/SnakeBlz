@@ -19,6 +19,7 @@ public partial class GameComponent : IDisposable
     private int Score { get; set; } = 0;
     private string Message { get; set; }
 
+    // Blazing Status Properties
     private int BlazingStatusCounter { get; set; } = 100;
     private bool IsHandleBlazingStatusLoopRunning { get; set; }
     private int ProgressBarPercentageNumber { get; set; } = 0;
@@ -109,6 +110,11 @@ public partial class GameComponent : IDisposable
                     CancellationToken = BlazingStatusCancellationTokenSource.Token;
                     HandleBlazingStatus(CancellationToken);
                 }
+            }
+            else if (GameMode == GameMode.Blazor && !Gameboard.Snake.IsBlazing)
+            {
+                ProgressBarPercentageNumber = Gameboard.Snake.BlazingStacks * 20;
+                StateHasChanged();
             }
         }
 
