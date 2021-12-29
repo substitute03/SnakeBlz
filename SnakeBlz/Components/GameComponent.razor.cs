@@ -29,7 +29,7 @@ public partial class GameComponent : IDisposable
     { 
         set
         {
-            GameMode = (Enums.GameMode)Enum.Parse(typeof(Enums.GameMode), value, true);
+            GameMode = (Enums.GameMode)Enum.Parse(typeof(Enums.GameMode), value, ignoreCase: true);
         }
     }
     public GameMode GameMode { get; set; } = GameMode.Blazor;
@@ -111,7 +111,7 @@ public partial class GameComponent : IDisposable
             PlaySound("consumePellet");
 
             if (GameMode == GameMode.Blazor && Gameboard.Snake.IsBlazing)
-            sdw{
+            {
                 if (IsHandleBlazingStatusLoopRunning)
                 {
                     BlazingStatusCounter += 20;

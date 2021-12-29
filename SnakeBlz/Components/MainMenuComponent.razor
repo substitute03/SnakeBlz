@@ -2,14 +2,10 @@
 
 @if (!IsLoading)
 {
-   <div class="container d-flex justify-content-center">
-    <div class="container">
-
-        <div class="row col-lg-12 text-center">
+   <div class="container" style="height: 100vh">
+       
+        <div class="vstack gap-2 col-md-4 mx-auto text-center">
             <h2>SnakeBlz <img src=/icon-192.png height="75" width="75"/></h2>
-        </div>
-
-        <div class="row col-lg-2 offset-lg-5 mt-4 text-center">
             <EditForm Model="SelectedOptions" OnValidSubmit="@HandleValidSubmit">
 
                 <div class="form-group">
@@ -17,7 +13,7 @@
                     <InputSelect @bind-Value="@SelectedOptions.SelectedGameMode" class="form-select" aria-label="Game mode select">
                         @foreach (var gameMode in GameModeOptions)
                         {
-                            <option class="select-i">@gameMode</option>
+                            <option >@gameMode</option>
                         }
                     </InputSelect>
                 </div>
@@ -29,6 +25,5 @@
             </EditForm>
         </div>
 
-    </div>
-</div> 
+    </div> 
 }
