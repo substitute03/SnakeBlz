@@ -15,7 +15,6 @@ public partial class GameComponent : IDisposable
     [Inject] private NavigationManager NavigationManager { get; set; }
 
     private int SnakeSpeedInMilliseconds { get; set; } = 80;
-    private bool AllowInput => GameState == GameState.InProgress;
     private int Score { get; set; } = 0;
     private string Message { get; set; }
 
@@ -329,7 +328,7 @@ public partial class GameComponent : IDisposable
     [JSInvokable ("HandleKeyPress")]
     public async Task HandleKeyPress (string key)
     {
-        if (!AllowInput)
+        if (GameState != GameState.InProgress)
         {
             return;
         }
