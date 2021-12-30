@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using SnakeBlz.Domain;
+using System.Diagnostics;
 using System.Drawing;
 using static SnakeBlz.Domain.Enums;
 
@@ -11,15 +12,20 @@ public partial class GameComponent : IDisposable
     #region Properties
     private GameboardComponent Gameboard { get; set; }
     private DotNetObjectReference<GameComponent> gameboardObjectReference;
-    private CancellationTokenSource BlazingStatusCancellationTokenSource { get; set; }
-    private CancellationToken CancellationToken { get; set; }
 
     private int SnakeSpeedInMilliseconds { get; set; } = 80;
     private bool AllowInput => GameState == GameState.InProgress;
     private int Score { get; set; } = 0;
     private string Message { get; set; }
 
-    // Blazing Status Properties
+    // Blitz game mode properties
+    private CancellationToken BlitzTimerCancellationToken { get; set; }
+    private CancellationTokenSource BlitzTimerCancellationSource { get; set; }
+    private Stopwatch BlitzStopwatch { get; set; } = new();
+
+    // Blazing properties
+    private CancellationToken BazingCancellationToken { get; set; }
+    private CancellationTokenSource BlazingCancellationSource { get; set; }
     private int BlazingStatusCounter { get; set; } = 100;
     private bool IsHandleBlazingStatusLoopRunning { get; set; }
     private int ProgressBarPercentageNumber { get; set; } = 0;
@@ -41,8 +47,6 @@ public partial class GameComponent : IDisposable
     private LinkedList<string> StoredKeyPresses { get; set; } = new();
     #endregion
 
-    protected override async Task OnInitializedAsync(){}
-
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -63,6 +67,14 @@ public partial class GameComponent : IDisposable
         SpawnSnake();
         SpawnPellet();
 
+        if (GameMode == GameMode.Blitz)
+        {
+            BlitzTimerCancellationSource = new CancellationTokenSource();
+            BlitzTimerCancellationToken = BlitzTimerCancellationSource.Token;
+
+            StartTimer(30000, BlitzTimerCancellationToken);
+        }
+
         await StartGameLoop();
 
         GameState = GameState.GameOver;
@@ -71,7 +83,7 @@ public partial class GameComponent : IDisposable
     private void ResetGameStatus()
     {
         IsHandleBlazingStatusLoopRunning = false;
-        BlazingStatusCancellationTokenSource = new();
+        BlazingCancellationSource = new();
         BlazingStatusCounter = 100;
 
         Gameboard.ClearCells();
@@ -84,7 +96,7 @@ public partial class GameComponent : IDisposable
     {
         Gameboard.Snake = new Snake();
 
-        if (GameMode == GameMode.Blazor)
+        if (GameMode == GameMode.Blazor || GameMode == GameMode.Blitz)
         {
             Gameboard.Snake.CanBlaze = true;
         }
@@ -110,7 +122,7 @@ public partial class GameComponent : IDisposable
         {
             PlaySound("consumePellet");
 
-            if (GameMode == GameMode.Blazor && Gameboard.Snake.IsBlazing)
+            if ((GameMode == GameMode.Blazor || GameMode == GameMode.Blitz) && Gameboard.Snake.IsBlazing)
             {
                 if (IsHandleBlazingStatusLoopRunning)
                 {
@@ -119,12 +131,12 @@ public partial class GameComponent : IDisposable
                 }
                 else
                 {
-                    BlazingStatusCancellationTokenSource = new CancellationTokenSource();
-                    CancellationToken = BlazingStatusCancellationTokenSource.Token;
-                    HandleBlazingStatus(CancellationToken);
+                    BlazingCancellationSource = new CancellationTokenSource();
+                    BazingCancellationToken = BlazingCancellationSource.Token;
+                    HandleBlazingStatus(BazingCancellationToken);
                 }
             }
-            else if (GameMode == GameMode.Blazor && !Gameboard.Snake.IsBlazing)
+            else if ((GameMode == GameMode.Blazor || GameMode == GameMode.Blitz) && !Gameboard.Snake.IsBlazing)
             {
                 ProgressBarPercentageNumber = Gameboard.Snake.BlazingStacks * 20;
                 StateHasChanged();
@@ -182,7 +194,7 @@ public partial class GameComponent : IDisposable
         StateHasChanged();
     }
 
-    private async Task HandleBlazingStatus(CancellationToken token)
+    private async Task HandleBlazingStatus(CancellationToken cancellationToken)
     {
         Task handle = Task.Run(async() =>
         {
@@ -199,7 +211,7 @@ public partial class GameComponent : IDisposable
             // If pellets are consumed while Blazing status is active, the BlazinStatusCeilingCounter is increased, prolonging the Blazing status. 
             for (int i = BlazingStatusCounter; i >= 0;)
             {
-                token.ThrowIfCancellationRequested();
+                cancellationToken.ThrowIfCancellationRequested();
                 i = BlazingStatusCounter;
                 i--;
                 BlazingStatusCounter--;
@@ -218,7 +230,33 @@ public partial class GameComponent : IDisposable
             PlaySound("countdownEnd");
 
             IsHandleBlazingStatusLoopRunning = false;
-        }, token);
+        }, cancellationToken);
+    }
+
+    private async Task StartTimer(double durationInMilliseconds, CancellationToken cancellationToken)
+    {
+        Task timerTask = Task.Run(async () =>
+        {
+            BlitzStopwatch = new();
+            BlitzStopwatch.Start();
+
+            while (BlitzStopwatch.ElapsedMilliseconds <= durationInMilliseconds && !BlitzTimerCancellationSource.IsCancellationRequested)
+            {
+                TimeSpan timeRemaining =
+                    TimeSpan.FromMilliseconds(durationInMilliseconds - BlitzStopwatch.ElapsedMilliseconds);
+
+                string timeRemainingInMinutesAndSeconds =
+                    $"{(int)timeRemaining.TotalMinutes}:{timeRemaining.Seconds:00}";
+
+                Message = $"{timeRemainingInMinutesAndSeconds}";
+                StateHasChanged();
+
+                await Task.Delay(1000);
+            }
+
+            BlitzStopwatch.Stop();
+            StateHasChanged();
+        }, cancellationToken);
     }
 
     private async Task PlaySound(string soundName)
@@ -245,7 +283,9 @@ public partial class GameComponent : IDisposable
             StateHasChanged();
             await Task.Delay(SnakeSpeedInMilliseconds);
 
-        } while (!Gameboard.IsInIllegalState);
+        } while (
+            (GameMode == GameMode.Blitz && BlitzStopwatch.IsRunning && !Gameboard.IsInIllegalState) ||
+            (GameMode != GameMode.Blitz && !Gameboard.IsInIllegalState));
 
 
         EndTime = new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
@@ -259,14 +299,28 @@ public partial class GameComponent : IDisposable
     {
         PlaySound("gameOver");
 
-        if (BlazingStatusCancellationTokenSource != null)
+        if (BlazingCancellationSource != null)
         {
-            BlazingStatusCancellationTokenSource.Cancel();
+            BlazingCancellationSource.Cancel();
+        }
+
+        if (GameMode == GameMode.Blitz && BlitzTimerCancellationSource != null)
+        {
+            BlitzTimerCancellationSource.Cancel();
         }
         
         GameResults results = new GameResults(Score, Duration);
         GameState = GameState.GameOver;
-        Message = $"Game over! Duration {Duration}.";
+
+        if (GameMode == GameMode.Blitz && !BlitzStopwatch.IsRunning)
+        {
+            Message = "Time's up!";
+        }
+        else
+        {
+            Message = $"Game over! Duration {Duration}.";
+        }
+
         StateHasChanged();
     }
 

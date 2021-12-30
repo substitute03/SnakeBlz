@@ -32,8 +32,6 @@ public partial class MainMenuComponent
 
     private async Task HandleValidSubmit()
     {
-        var a = SelectedOptions.SelectedGameMode;
-
         NavigationManager.NavigateTo($"/play/{SelectedOptions.SelectedGameMode}", forceLoad: true);
     }
 }

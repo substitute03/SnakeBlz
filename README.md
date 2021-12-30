@@ -3,7 +3,7 @@ SnakeBlz is a take on the classic Snake game built in Blazor WASM, .NET 6 and C#
 
 ## Overview
 
-The aim of the game is to score as many points as possible by guiding the Snake to consume pellets. Each time a pellet is consumed the Snake will become one block longer.
+The aim of the game is to score as many points as possible by guiding the Snake to consume pellets. Each time a pellet is consumed, the Snake will become one block longer.
 You will get a game over if the Snake either goes out of bounds, or collides with itself.
 
 

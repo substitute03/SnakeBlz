@@ -6,17 +6,19 @@
 <audio id="countdownEnd" src="../sounds/CountdownEnd.mp3"/>
 <audio id="consumePellet" src="../sounds/ConsumePellet.mp3"/>
 <audio id="gameOver" src="../sounds/GameOver.mp3"/>
-
+<h5>@BlitzStopwatch.IsRunning</h5>
+<h5>@GameMode</h5>
 <div class="mb-3">
     <div class="container">
-        <div class="row col-lg-12 text-center">
+@*        <div class="row col-lg-12 text-center">
             <h2>SnakeBlz <img src=/icon-192.png height="75" width="75"/></h2>
-        </div>
+        </div>*@
         <div class="row col-lg-12 text-center">
+                <h2>@GameMode</h2>
                 <h2>Score: @Score</h2>
         </div>
 
-        @if (GameMode == Enums.GameMode.Blazor)
+        @if (GameMode == Enums.GameMode.Blazor || GameMode == Enums.GameMode.Blitz)
         {
             <div class="row">
                 <div class="col-6 offset-3">
