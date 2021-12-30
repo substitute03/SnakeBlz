@@ -6,15 +6,14 @@
 <audio id="countdownEnd" src="../sounds/CountdownEnd.mp3"/>
 <audio id="consumePellet" src="../sounds/ConsumePellet.mp3"/>
 <audio id="gameOver" src="../sounds/GameOver.mp3"/>
-<h5>@BlitzStopwatch.IsRunning</h5>
-<h5>@GameMode</h5>
+
 <div class="mb-3">
     <div class="container">
-@*        <div class="row col-lg-12 text-center">
-            <h2>SnakeBlz <img src=/icon-192.png height="75" width="75"/></h2>
-        </div>*@
+        
+        <button type="button" class="btn btn-outline-secondary" @onclick="NavigateToMainMenu">Main menu</button>
+
         <div class="row col-lg-12 text-center">
-                <h2>@GameMode</h2>
+                <h1 class="@(GameMode == Enums.GameMode.Blazor? "text-warning" : GameMode == Enums.GameMode.Blitz? "text-danger" : "text-primary")">@GameMode</h1>
                 <h2>Score: @Score</h2>
         </div>
 

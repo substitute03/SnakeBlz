@@ -12,6 +12,7 @@ public partial class GameComponent : IDisposable
     #region Properties
     private GameboardComponent Gameboard { get; set; }
     private DotNetObjectReference<GameComponent> gameboardObjectReference;
+    [Inject] private NavigationManager NavigationManager { get; set; }
 
     private int SnakeSpeedInMilliseconds { get; set; } = 80;
     private bool AllowInput => GameState == GameState.InProgress;
@@ -365,6 +366,11 @@ public partial class GameComponent : IDisposable
 
         StoredKeyPresses.AddLast(key);
         StateHasChanged();
+    }
+
+    private async Task NavigateToMainMenu()
+    {
+        NavigationManager.NavigateTo($"/", forceLoad: true);
     }
 
     public void Dispose()
