@@ -73,7 +73,7 @@ public partial class GameComponent : IDisposable
             BlitzTimerCancellationSource = new CancellationTokenSource();
             BlitzTimerCancellationToken = BlitzTimerCancellationSource.Token;
 
-            StartTimer(30000, BlitzTimerCancellationToken);
+            StartTimer(60000, BlitzTimerCancellationToken);
         }
 
         await StartGameLoop();

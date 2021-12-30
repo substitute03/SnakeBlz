@@ -10,7 +10,7 @@
 <div class="mb-3">
     <div class="container">
         
-        <button type="button" class="btn btn-outline-secondary" @onclick="NavigateToMainMenu">Main menu</button>
+        <button type="button" class="btn btn-outline-secondary" @onclick="NavigateToMainMenu">Main Menu</button>
 
         <div class="row col-lg-12 text-center">
                 <h1 class="@(GameMode == Enums.GameMode.Blazor? "text-warning" : GameMode == Enums.GameMode.Blitz? "text-danger" : "text-primary")">@GameMode</h1>

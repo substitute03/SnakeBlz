@@ -19,11 +19,78 @@
                 </div>
 
                 <div class="d-grid">
-                    <button type="submit" class="btn btn-secondary mt-4 d-sm-block">Play</button>
+                    <button type="submit" class="btn btn-primary mt-4 d-sm-block">Play</button>
                 </div>
 
             </EditForm>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#helpModal">
+                Help
+            </button>
         </div>
 
     </div> 
+
+    <div id="helpModal" class="modal fade" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Help</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+                    <h2 id="snakeblz">SnakeBlz</h2>
+
+                    <p>SnakeBlz is a take on the classic Snake game built in Blazor WASM, .NET 6 and C# 10.</p>
+
+                    <h2 id="overview">Overview</h2>
+
+                    <p>The aim of the game is to score as many points as possible by guiding the Snake to consume pellets. Each time a pellet is consumed, the Snake will become one block longer.
+                    You will get a game over if the Snake either goes out of bounds or collides with itself.</p>
+
+                    <h2 id="gamemodes">Game Modes</h2>
+
+                    <ul>
+                        <li><strong>Classic</strong>
+                            <ul>
+                                <li>
+                                    A recreation of the classic Snake game. Eat as many pellets as you can without going out of bounds or allowing the Snake to collide with itself.
+                                </li>
+                            </ul>
+                        </li>
+                        <li><strong>Blazor</strong>
+                            <ul>
+                                <li>
+                                    The same rules as Classic but, now, Collect pellets will fill up the Blazing meter. When the Blazing meter is full, the Snake will start blazing for 5 seconds. During this time, all pellets
+                                    are worth double points and collecting pellets will extend the Blazing status for an extra 1 second.
+                                </li>
+                            </ul>
+                        </li>
+                        <li><strong>Blitz</strong>
+                            <ul>
+                                <li>
+                                    The same rules as Blazor but, this time, you're against the clock. Score as many points as you can within the time limit.
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+
+                    <h2 id="controls">Controls</h2>
+
+                    <p>The Snake is controlled using the WASD keys.</p>
+
+                    <ul>
+                        <li>W - move the Snake up.</li>
+                        <li>A - move the Snake left.</li>
+                        <li>S - move the Snake down.</li>
+                        <li>D - move thte Snake right.</li>
+                    </ul>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 }

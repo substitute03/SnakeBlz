@@ -11,6 +11,7 @@ public partial class MainMenuComponent
     private MainMenuSelectedOptionsDto SelectedOptions { get; set; } = new();
     private EditContext Model { get; set; }
     private bool IsLoading { get; set; }
+    private bool HideHelpModal { get; set; } = true;
     [Inject] private NavigationManager NavigationManager { get; set; }
 
     protected override void OnInitialized() 
