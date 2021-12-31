@@ -60,6 +60,8 @@ public partial class GameComponent
 
     private async Task StartNewGame()
     {
+        GameState = GameState.Setup;
+
         ResetGameStatus();
         SpawnSnake();
         SpawnPellet();
