@@ -33,6 +33,6 @@ public partial class MainMenuComponent
 
     private async Task HandleValidSubmit()
     {
-        NavigationManager.NavigateTo($"/play/{SelectedOptions.SelectedGameMode}", forceLoad: true);
+        NavigationManager.NavigateTo($"/play/{SelectedOptions.SelectedGameMode.ToString().ToLower()}", forceLoad: false);
     }
 }

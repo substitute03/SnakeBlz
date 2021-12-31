@@ -7,7 +7,7 @@ using static SnakeBlz.Domain.Enums;
 
 namespace SnakeBlz.Components;
 
-public partial class GameComponent : IDisposable
+public partial class GameComponent
 {
     #region Properties
     private GameboardComponent Gameboard { get; set; }
@@ -60,24 +60,11 @@ public partial class GameComponent : IDisposable
 
     private async Task StartNewGame()
     {
-        GameState = GameState.InProgress;
-
         ResetGameStatus();
-        await PlayCountdown();
         SpawnSnake();
         SpawnPellet();
-
-        if (GameMode == GameMode.Blitz)
-        {
-            BlitzTimerCancellationSource = new CancellationTokenSource();
-            BlitzTimerCancellationToken = BlitzTimerCancellationSource.Token;
-
-            StartTimer(60000, BlitzTimerCancellationToken);
-        }
-
+        await PlayCountdown();
         await StartGameLoop();
-
-        GameState = GameState.GameOver;
     }
 
     private void ResetGameStatus()
@@ -266,7 +253,16 @@ public partial class GameComponent : IDisposable
 
     public async Task StartGameLoop()
     {
+        GameState = GameState.InProgress;
         StartTime = new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
+
+        if (GameMode == GameMode.Blitz)
+        {
+            BlitzTimerCancellationSource = new CancellationTokenSource();
+            BlitzTimerCancellationToken = BlitzTimerCancellationSource.Token;
+
+            StartTimer(60000, BlitzTimerCancellationToken);
+        }
 
         do
         {
@@ -287,7 +283,7 @@ public partial class GameComponent : IDisposable
             (GameMode == GameMode.Blitz && BlitzStopwatch.IsRunning && !Gameboard.IsInIllegalState) ||
             (GameMode != GameMode.Blitz && !Gameboard.IsInIllegalState));
 
-
+        GameState = GameState.GameOver;
         EndTime = new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
 
         await HandleGameOver();
@@ -299,15 +295,7 @@ public partial class GameComponent : IDisposable
     {
         PlaySound("gameOver");
 
-        if (BlazingCancellationSource != null)
-        {
-            BlazingCancellationSource.Cancel();
-        }
-
-        if (GameMode == GameMode.Blitz && BlitzTimerCancellationSource != null)
-        {
-            BlitzTimerCancellationSource.Cancel();
-        }
+        DisposeTasks();
         
         GameResults results = new GameResults(Score, Duration);
         GameState = GameState.GameOver;
@@ -370,11 +358,20 @@ public partial class GameComponent : IDisposable
 
     private async Task NavigateToMainMenu()
     {
-        NavigationManager.NavigateTo($"/", forceLoad: true);
+        DisposeTasks();
+        NavigationManager.NavigateTo($"/", forceLoad: false);
     }
 
-    public void Dispose()
+    private void DisposeTasks()
     {
-        gameboardObjectReference.Dispose();
+        if (BlazingCancellationSource != null)
+        {
+            BlazingCancellationSource.Cancel();
+        }
+
+        if (GameMode == GameMode.Blitz && BlitzTimerCancellationSource != null)
+        {
+            BlitzTimerCancellationSource.Cancel();
+        }
     }
 }
