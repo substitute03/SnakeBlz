@@ -333,12 +333,13 @@ public partial class GameComponent : IDisposable
             return;
         }
 
-        if (!"wasd".Contains(key))
+        Direction directionToMove = Direction.FromKey(key);
+
+        if (directionToMove == Direction.None)
         {
             return;
         }
 
-        Direction directionToMove = Direction.FromKey(key);
         Direction nextDirection = Direction.FromKey(StoredKeyPresses.FirstOrDefault());
 
         if (StoredKeyPresses.Count == 0)

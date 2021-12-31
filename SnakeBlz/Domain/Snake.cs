@@ -15,7 +15,6 @@ namespace SnakeBlz.Domain
         public Direction DirectionToMove { get; set; } = Direction.Left;
         public bool IsOutOfBounds { get; set; } = false;
         public bool HasCollidedWithSelf { get; set; } = false;
-        //public bool IsBlazing { get; set; } = false;
         public int BlazingStacks { get; set; } = 0;
         public bool CanBlaze { get; set; }
         public bool IsBlazing => CanBlaze && BlazingStacks >= 5;
