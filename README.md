@@ -19,11 +19,11 @@ are worth double points and collecting pellets will extend the Blazing status fo
 
 ## Controls
 
-The Snake is controlled using the WASD keys.
+The Snake is controlled using the WASD or the arrow keys.
 
-- W - move the Snake up.
-- A - move the Snake left.
-- S - move the Snake down.
-- D - move thte Snake right.
+- W or Up Arrow - move the Snake up.
+- A or Left Arrow- move the Snake left.
+- S or Down Arrow - move the Snake down.
+- D or Right Arrow - move thte Snake right.
 
 
