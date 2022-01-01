@@ -7,3 +7,13 @@
 function playAudio(elementName) {
     document.getElementById(elementName).play();
 }
+
+function showHighScoreModal() {
+    var modal = new bootstrap.Modal(document.getElementById('highScoreModal'), {});
+    modal.show();
+}
+
+function hideHighScoreModal() {
+    var modal = new bootstrap.Modal(document.getElementById('highScoreModal'), {});
+    modal.hide();
+}

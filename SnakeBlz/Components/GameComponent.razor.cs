@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using SnakeBlz.Domain;
+using SnakeBlz.DTOs;
 using System.Diagnostics;
 using System.Drawing;
 using static SnakeBlz.Domain.Enums;
@@ -29,6 +30,7 @@ public partial class GameComponent : IDisposable
     private int SnakeSpeedInMilliseconds { get; set; } = 80;
     private int Score { get; set; } = 0;
     private string Message { get; set; }
+    private bool ShowGameResultsForm { get; set; }
 
     // Blitz game mode properties
     private CancellationToken BlitzTimerCancellationToken { get; set; }
@@ -303,15 +305,20 @@ public partial class GameComponent : IDisposable
 
             await HandleGameOver();
         }, cancellationToken);
-        //return results;
     }
 
     private async Task HandleGameOver()
     {
         PlayAudio("gameOver");
         CancelBlitzAndBlazingTasks();
-        
-        GameResults results = new GameResults(Score, GameDuration);
+
+        GameResultsDto results = new GameResultsDto
+        {
+            GameModeId = (int)GameMode,
+            PlayerName = "",
+            Score = Score
+        };
+
         GameState = GameState.GameOver;
 
         if (GameMode == GameMode.Blitz && !BlitzStopwatch.IsRunning)
@@ -323,6 +330,7 @@ public partial class GameComponent : IDisposable
             Message = $"Game over! Duration {GameDuration}.";
         }
 
+        await JSRuntime.InvokeVoidAsync("showHighScoreModal");
         StateHasChanged();
     }
 
