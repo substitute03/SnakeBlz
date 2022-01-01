@@ -344,7 +344,12 @@ public partial class GameComponent : IDisposable
 
         if (key == " ")
         {
-            IsPaused = !IsPaused;
+            if (GameMode != GameMode.Blitz) // The game is only pausable when not play Blitz mode.
+            {
+                IsPaused = !IsPaused;
+                Message = IsPaused ? "Paused." : String.Empty;
+                StateHasChanged();
+            }
         }
 
         if (IsPaused)

@@ -33,6 +33,8 @@ public partial class MainMenuComponent
 
     private async Task HandleValidSubmit()
     {
-        NavigationManager.NavigateTo($"/play/{SelectedOptions.SelectedGameMode.ToString().ToLower()}", forceLoad: false);
+        // Force load is set to true as otherwise, when the user navigates using the back and forward browser options when the game is paused, it can interfere with the Snake's movement.
+        // Force load makes Blazor bypass it's own routing system and it will instead go to the server to get the content to display.
+        NavigationManager.NavigateTo($"/play/{SelectedOptions.SelectedGameMode.ToString().ToLower()}", forceLoad: true);
     }
 }
