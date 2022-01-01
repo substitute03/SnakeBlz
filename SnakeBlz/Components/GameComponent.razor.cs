@@ -7,16 +7,21 @@ using static SnakeBlz.Domain.Enums;
 
 namespace SnakeBlz.Components;
 
-public partial class GameComponent
+public partial class GameComponent : IDisposable
 {
     #region Properties
     private GameboardComponent Gameboard { get; set; }
-    private DotNetObjectReference<GameComponent> gameboardObjectReference;
+    private DotNetObjectReference<GameComponent> gameboardObjectReference; // Used to allow JSRuntime to access this component to call methods in this component.
     [Inject] private NavigationManager NavigationManager { get; set; }
 
+    private bool IsPaused { get; set; }
     private int SnakeSpeedInMilliseconds { get; set; } = 80;
     private int Score { get; set; } = 0;
     private string Message { get; set; }
+
+    // Game loop cancellation properties
+    private CancellationToken GameLoopCancellationToken { get; set; }
+    private CancellationTokenSource GameLoopCancellationTokenSource { get; set; } = new();
 
     // Blitz game mode properties
     private CancellationToken BlitzTimerCancellationToken { get; set; }
@@ -66,15 +71,15 @@ public partial class GameComponent
         SpawnSnake();
         SpawnPellet();
         await PlayCountdown();
-        await StartGameLoop();
+
+        GameLoopCancellationToken = GameLoopCancellationTokenSource.Token;
+        await StartGameLoop(GameLoopCancellationToken);
     }
 
     private void ResetGameStatus()
     {
         IsHandleBlazingStatusLoopRunning = false;
-        BlazingCancellationSource = new();
         BlazingStatusCounter = 100;
-
         Gameboard.ClearCells();
         Score = 0;
         ProgressBarPercentageNumber = 0;
@@ -201,6 +206,13 @@ public partial class GameComponent
             for (int i = BlazingStatusCounter; i >= 0;)
             {
                 cancellationToken.ThrowIfCancellationRequested();
+
+                while (IsPaused)
+                {
+                    await Task.Delay(1);
+                    continue;
+                }
+
                 i = BlazingStatusCounter;
                 i--;
                 BlazingStatusCounter--;
@@ -253,51 +265,58 @@ public partial class GameComponent
         await JSRuntime.InvokeVoidAsync("playAudio", soundName);
     }
 
-    public async Task StartGameLoop()
+    public async Task StartGameLoop(CancellationToken cancellationToken)
     {
-        GameState = GameState.InProgress;
-        StartTime = new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
-
-        if (GameMode == GameMode.Blitz)
+        Task gameLoopTask = Task.Run(async () =>
         {
-            BlitzTimerCancellationSource = new CancellationTokenSource();
-            BlitzTimerCancellationToken = BlitzTimerCancellationSource.Token;
+            GameState = GameState.InProgress;
+            StartTime = new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
 
-            StartTimer(60000, BlitzTimerCancellationToken);
-        }
-
-        do
-        {
-            Direction nextDirection = Direction.FromKey(StoredKeyPresses.FirstOrDefault());
-
-            if (StoredKeyPresses.Count > 0)
+            if (GameMode == GameMode.Blitz)
             {
-                StoredKeyPresses.RemoveFirst();
+                BlitzTimerCancellationSource = new CancellationTokenSource();
+                BlitzTimerCancellationToken = BlitzTimerCancellationSource.Token;
+
+                StartTimer(60000, BlitzTimerCancellationToken);
             }
 
-            await Gameboard.MoveSnake(nextDirection);
-            Score = Gameboard.Snake.CountPelletsConsumed;
+            do
+            {
+                while (IsPaused)
+                {
+                    await Task.Delay(1);
+                    continue;
+                }
 
-            StateHasChanged();
-            await Task.Delay(SnakeSpeedInMilliseconds);
+                Direction nextDirection = Direction.FromKey(StoredKeyPresses.FirstOrDefault());
 
-        } while (
+                if (StoredKeyPresses.Count > 0)
+                {
+                    StoredKeyPresses.RemoveFirst();
+                }
+
+                await Gameboard.MoveSnake(nextDirection);
+                Score = Gameboard.Snake.CountPelletsConsumed;
+
+                StateHasChanged();
+                await Task.Delay(SnakeSpeedInMilliseconds);
+
+            } while (
             (GameMode == GameMode.Blitz && BlitzStopwatch.IsRunning && !Gameboard.IsInIllegalState) ||
             (GameMode != GameMode.Blitz && !Gameboard.IsInIllegalState));
 
-        GameState = GameState.GameOver;
-        EndTime = new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
+            GameState = GameState.GameOver;
+            EndTime = new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
 
         await HandleGameOver();
-   
+        }, cancellationToken);
         //return results;
     }
 
     private async Task HandleGameOver()
     {
         PlaySound("gameOver");
-
-        DisposeTasks();
+        CancelBlitzAndBlazingTasks();
         
         GameResults results = new GameResults(Score, Duration);
         GameState = GameState.GameOver;
@@ -319,6 +338,16 @@ public partial class GameComponent
     public async Task HandleKeyPress (string key)
     {
         if (GameState != GameState.InProgress)
+        {
+            return;
+        }
+
+        if (key == " ")
+        {
+            IsPaused = !IsPaused;
+        }
+
+        if (IsPaused)
         {
             return;
         }
@@ -360,11 +389,26 @@ public partial class GameComponent
 
     private async Task NavigateToMainMenu()
     {
-        DisposeTasks();
+        if (GameLoopCancellationTokenSource != null)
+        {
+            GameLoopCancellationTokenSource.Cancel();
+        }
+
+        CancelBlitzAndBlazingTasks();
+        Dispose();
+
         NavigationManager.NavigateTo($"/", forceLoad: false);
     }
 
-    private void DisposeTasks()
+    public void Dispose()
+    {
+        // Dispose of the object reference used to allow JSInterop to access this component.
+        // If this is not done, a memory leak will occur as JS could still be running
+        // (although in this instance, JS is just used to play sounds so probably not an issue.
+        gameboardObjectReference.Dispose();
+    }
+
+    private void CancelBlitzAndBlazingTasks()
     {
         if (BlazingCancellationSource != null)
         {
