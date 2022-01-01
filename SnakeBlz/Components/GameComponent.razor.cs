@@ -130,28 +130,13 @@ public partial class GameComponent : IDisposable
         }
 
         Point emptyCellPoint =
-            GetEmptyCellCoordinates();
+            Gameboard.GetEmptyCellCoordinates();
 
         var emptyCell = Gameboard.Cells
             .Where(c => c.X == emptyCellPoint.X && c.Y == emptyCellPoint.Y)
             .Single();
 
         emptyCell.CellType = CellType.Pellet;
-    }
-
-    private Point GetEmptyCellCoordinates()
-    {
-        List<CellComponent>? emptyCells =
-            Gameboard.Cells.Where(c => c.CellType == CellType.Empty).ToList();
-
-        Random random = new Random();
-        int emptyCellIndex = random.Next(random.Next(0, emptyCells.Count));
-
-        return new Point
-        {
-            X = emptyCells[emptyCellIndex].X,
-            Y = emptyCells[emptyCellIndex].Y
-        };
     }
 
     private async Task PlayCountdown()

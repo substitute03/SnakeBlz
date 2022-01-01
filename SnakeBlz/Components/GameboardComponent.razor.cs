@@ -127,6 +127,21 @@ public partial class GameboardComponent
         return Task.FromResult(false);
     }
 
+    public Point GetEmptyCellCoordinates()
+    {
+        List<CellComponent>? emptyCells =
+            Cells.Where(c => c.CellType == CellType.Empty).ToList();
+
+        Random random = new Random();
+        int emptyCellIndex = random.Next(random.Next(0, emptyCells.Count));
+
+        return new Point
+        {
+            X = emptyCells[emptyCellIndex].X,
+            Y = emptyCells[emptyCellIndex].Y
+        };
+    }
+
     public int GetCellIndex(int positionX, int positionY)
     {
         return Cells
