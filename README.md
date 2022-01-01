@@ -26,4 +26,6 @@ The Snake is controlled using the WASD or the arrow keys.
 - S or Down Arrow - move the Snake down.
 - D or Right Arrow - move thte Snake right.
 
+You can paused the game by pressing the space bar. This feature is not available when playing Blitz mode.
+
 
