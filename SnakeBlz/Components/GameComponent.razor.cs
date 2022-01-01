@@ -106,7 +106,7 @@ public partial class GameComponent : IDisposable
     {
         if (Gameboard.Snake.CountPelletsConsumed > 0)
         {
-            PlaySound("consumePellet");
+            PlayAudio("consumePellet");
 
             if ((GameMode == GameMode.Blazor || GameMode == GameMode.Blitz) && Gameboard.Snake.IsBlazing)
             {
@@ -141,22 +141,22 @@ public partial class GameComponent : IDisposable
 
     private async Task PlayCountdown()
     {
-        PlaySound("countdownInProgress");
+        PlayAudio("countdownInProgress");
         Message = "Starting in...3";
         StateHasChanged();
         await Task.Delay(850);
 
-        PlaySound("countdownInProgress");
+        PlayAudio("countdownInProgress");
         Message = "Starting in...2";
         StateHasChanged();
         await Task.Delay(850);
 
-        PlaySound("countdownInProgress");
+        PlayAudio("countdownInProgress");
         Message = "Starting in...1";
         StateHasChanged();
         await Task.Delay(850);
 
-        PlaySound("countdownEnd");
+        PlayAudio("countdownEnd");
         Message = "Go!";
         StateHasChanged();
         await Task.Delay(850);
@@ -176,7 +176,7 @@ public partial class GameComponent : IDisposable
                 cell.CellType = CellType.BlazingSnake;
             }
 
-            PlaySound("countdownInProgress");
+            PlayAudio("countdownInProgress");
 
             // This will loop for a default of 5 seconds and update the progress bar every 0.05 seconds.
             // If pellets are consumed while Blazing status is active, the BlazinStatusCeilingCounter is increased, prolonging the Blazing status. 
@@ -205,13 +205,13 @@ public partial class GameComponent : IDisposable
 
             BlazingStatusCounter = 100;
             Gameboard.Snake.ResetBlazingStacks();
-            PlaySound("countdownEnd");
+            PlayAudio("countdownEnd");
 
             IsHandleBlazingStatusLoopRunning = false;
         }, cancellationToken);
     }
 
-    private async Task StartTimer(double durationInMilliseconds, CancellationToken cancellationToken)
+    private async Task StartBlitzTimer(double durationInMilliseconds, CancellationToken cancellationToken)
     {
         Task timerTask = Task.Run(async () =>
         {
@@ -237,7 +237,7 @@ public partial class GameComponent : IDisposable
         }, cancellationToken);
     }
 
-    private async Task PlaySound(string soundName)
+    private async Task PlayAudio(string soundName)
     {
         await JSRuntime.InvokeVoidAsync("playAudio", soundName);
     }
@@ -257,7 +257,7 @@ public partial class GameComponent : IDisposable
                 BlitzTimerCancellationSource = new CancellationTokenSource();
                 BlitzTimerCancellationToken = BlitzTimerCancellationSource.Token;
 
-                StartTimer(60000, BlitzTimerCancellationToken);
+                StartBlitzTimer(60000, BlitzTimerCancellationToken);
             }
 
             do
@@ -308,7 +308,7 @@ public partial class GameComponent : IDisposable
 
     private async Task HandleGameOver()
     {
-        PlaySound("gameOver");
+        PlayAudio("gameOver");
         CancelBlitzAndBlazingTasks();
         
         GameResults results = new GameResults(Score, GameDuration);
