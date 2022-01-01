@@ -10,18 +10,25 @@ namespace SnakeBlz.Components;
 public partial class GameComponent : IDisposable
 {
     #region Properties
-    private GameboardComponent Gameboard { get; set; }
-    private DotNetObjectReference<GameComponent> gameboardObjectReference; // Used to allow JSRuntime to access this component to call methods in this component.
     [Inject] private NavigationManager NavigationManager { get; set; }
 
+    // Game properties
+    [Parameter] public string _gameMode
+    {
+        set => GameMode = (Enums.GameMode)Enum.Parse(typeof(Enums.GameMode), value, ignoreCase: true);
+    }
+    private DotNetObjectReference<GameComponent> gameboardObjectReference; // Used to allow JSRuntime to access this component to call methods in this component.
+    private GameboardComponent Gameboard { get; set; }
+    private CancellationToken GameLoopCancellationToken { get; set; }
+    private CancellationTokenSource GameLoopCancellationTokenSource { get; set; } = new();
+    public GameMode GameMode { get; set; } = GameMode.Blazor;
+    private GameState GameState { get; set; }
+    private TimeSpan GameDuration { get; set; }
+    private LinkedList<string> StoredKeyPresses { get; set; } = new();
     private bool IsPaused { get; set; }
     private int SnakeSpeedInMilliseconds { get; set; } = 80;
     private int Score { get; set; } = 0;
     private string Message { get; set; }
-
-    // Game loop cancellation properties
-    private CancellationToken GameLoopCancellationToken { get; set; }
-    private CancellationTokenSource GameLoopCancellationTokenSource { get; set; } = new();
 
     // Blitz game mode properties
     private CancellationToken BlitzTimerCancellationToken { get; set; }
@@ -35,21 +42,6 @@ public partial class GameComponent : IDisposable
     private bool IsHandleBlazingStatusLoopRunning { get; set; }
     private int ProgressBarPercentageNumber { get; set; } = 0;
     private string ProgressBarPercentageString => $"{ProgressBarPercentageNumber}%";
-
-    [Parameter] public string _gameMode 
-    { 
-        set
-        {
-            GameMode = (Enums.GameMode)Enum.Parse(typeof(Enums.GameMode), value, ignoreCase: true);
-        }
-    }
-    public GameMode GameMode { get; set; } = GameMode.Blazor;
-
-    private GameState GameState { get; set; }
-    private TimeOnly StartTime { get; set; }
-    private TimeOnly EndTime { get; set; }
-    private TimeSpan Duration => EndTime - StartTime;
-    private LinkedList<string> StoredKeyPresses { get; set; } = new();
     #endregion
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -167,22 +159,22 @@ public partial class GameComponent : IDisposable
         PlaySound("countdownInProgress");
         Message = "Starting in...3";
         StateHasChanged();
-        await Task.Delay(1000);
+        await Task.Delay(850);
 
         PlaySound("countdownInProgress");
         Message = "Starting in...2";
         StateHasChanged();
-        await Task.Delay(1000);
+        await Task.Delay(850);
 
         PlaySound("countdownInProgress");
         Message = "Starting in...1";
         StateHasChanged();
-        await Task.Delay(1000);
+        await Task.Delay(850);
 
         PlaySound("countdownEnd");
         Message = "Go!";
         StateHasChanged();
-        await Task.Delay(1000);
+        await Task.Delay(850);
 
         Message = String.Empty;
         StateHasChanged();
@@ -270,7 +262,10 @@ public partial class GameComponent : IDisposable
         Task gameLoopTask = Task.Run(async () =>
         {
             GameState = GameState.InProgress;
-            StartTime = new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
+            //StartTime = new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
+
+            var GameStopwatch = new Stopwatch();
+            GameStopwatch.Start();
 
             if (GameMode == GameMode.Blitz)
             {
@@ -284,8 +279,14 @@ public partial class GameComponent : IDisposable
             {
                 while (IsPaused)
                 {
+                    GameStopwatch.Stop();
                     await Task.Delay(1);
                     continue;
+                }
+
+                if (!GameStopwatch.IsRunning)
+                {
+                    GameStopwatch.Start();
                 }
 
                 Direction nextDirection = Direction.FromKey(StoredKeyPresses.FirstOrDefault());
@@ -306,9 +307,16 @@ public partial class GameComponent : IDisposable
             (GameMode != GameMode.Blitz && !Gameboard.IsInIllegalState));
 
             GameState = GameState.GameOver;
-            EndTime = new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
+            GameStopwatch.Stop();
 
-        await HandleGameOver();
+            int seconds = (int)(GameStopwatch.ElapsedMilliseconds / 1000) % 60;
+            int minutes = (int)((GameStopwatch.ElapsedMilliseconds / (1000 * 60)) % 60);
+            int hours = (int)((GameStopwatch.ElapsedMilliseconds / (1000 * 60 * 60)) % 24);
+
+            GameDuration = new TimeSpan(hours, minutes, seconds);
+            GameStopwatch.Reset();
+
+            await HandleGameOver();
         }, cancellationToken);
         //return results;
     }
@@ -318,7 +326,7 @@ public partial class GameComponent : IDisposable
         PlaySound("gameOver");
         CancelBlitzAndBlazingTasks();
         
-        GameResults results = new GameResults(Score, Duration);
+        GameResults results = new GameResults(Score, GameDuration);
         GameState = GameState.GameOver;
 
         if (GameMode == GameMode.Blitz && !BlitzStopwatch.IsRunning)
@@ -327,7 +335,7 @@ public partial class GameComponent : IDisposable
         }
         else
         {
-            Message = $"Game over! Duration {Duration}.";
+            Message = $"Game over! Duration {GameDuration}.";
         }
 
         StateHasChanged();
