@@ -10,10 +10,9 @@ You will get a game over if the Snake either goes out of bounds or collides with
 ## Game Modes
 
 - **Classic**
-  - A recreation of the classic Snake game. Eat as many pellets as you can without going out of bounds or allowing the Snake to collide with itself.
+  - A recreation of the classic Snake game. Consume as many pellets as you can without going out of bounds or allowing the Snake to collide with itself.
 - **Blazor**
-  - The same rules as Classic but, now, Collect pellets will fill up the Blazing meter. When the Blazing meter is full, the Snake will start blazing for 5 seconds. During this time, all pellets
-are worth double points and collecting pellets will extend the Blazing status for an extra 1 second.
+  - The same rules as Classic but, now, consuming pellets will fill up the Blazing meter. When the Blazing meter is full, the Snake will start blazing for 5 seconds. During this time, all pellets are worth double points and collecting pellets will extend the Blazing status for an extra 1 second.
 - **Blitz**
   - The same rules as Blazor but, this time, you're against the clock. Score as many points as you can within the time limit.
 
