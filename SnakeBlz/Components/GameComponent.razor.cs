@@ -112,7 +112,15 @@ public partial class GameComponent : IDisposable
             {
                 if (IsHandleBlazingStatusLoopRunning)
                 {
-                    BlazingStatusCounter += 20;
+                    if (BlazingStatusCounter + 20 > 100)
+                    {
+                        BlazingStatusCounter = 100;
+                    }
+                    else
+                    {
+                        BlazingStatusCounter += 20;
+                    }
+
                     StateHasChanged();
                 }
                 else
