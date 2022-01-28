@@ -13,7 +13,9 @@
         <button type="button" class="btn btn-outline-secondary" @onclick="NavigateToMainMenu">Main Menu</button>
 
         <div class="row col-lg-12 text-center">
-                <h1 class="@(GameMode == Enums.GameMode.Blazor? "text-warning" : GameMode == Enums.GameMode.Blitz? "text-danger" : "text-primary")">@GameMode</h1>
+                <h1 class="@(GameMode == Enums.GameMode.Blazor? "text-warning" : GameMode == Enums.GameMode.Blitz? "text-danger" : "text-primary")">
+                    <img class="img-fluid" src=/icon-192.png height="75" width="75"/> @GameMode
+                </h1>
                 <h2>Score: @Score</h2>
         </div>
 
